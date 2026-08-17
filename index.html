@@ -1,0 +1,585 @@
+<title>処方箋応需拡大プラン</title>
+<style>
+  :root {
+    --paper: #fbf3f0;
+    --paper-card: #ffffff;
+    --paper-sunken: #f4e9e4;
+    --line: #e6d5cd;
+    --ink: #1e2a42;
+    --ink-soft: #5b6478;
+    --ink-faint: #8890a0;
+    --green: #2e7d5c;
+    --green-soft: #e4f0ea;
+    --amber: #a85a12;
+    --amber-soft: #f8ead9;
+    --shadow: 0 1px 2px rgba(30,42,66,0.06), 0 8px 24px -12px rgba(30,42,66,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12181f;
+      --paper-card: #1a222b;
+      --paper-sunken: #202a35;
+      --line: #2d3947;
+      --ink: #edeef2;
+      --ink-soft: #a2acbe;
+      --ink-faint: #707c90;
+      --green: #56b590;
+      --green-soft: #1c3129;
+      --amber: #e0954a;
+      --amber-soft: #3a2a17;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #12181f;
+    --paper-card: #1a222b;
+    --paper-sunken: #202a35;
+    --line: #2d3947;
+    --ink: #edeef2;
+    --ink-soft: #a2acbe;
+    --ink-faint: #707c90;
+    --green: #56b590;
+    --green-soft: #1c3129;
+    --amber: #e0954a;
+    --amber-soft: #3a2a17;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Yu Gothic", "YuGothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", sans-serif;
+    font-feature-settings: "palt";
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .mincho {
+    font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  a { color: var(--green); text-decoration-color: color-mix(in srgb, var(--green) 40%, transparent); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, .toc a:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 2px; }
+
+  /* ---- letterhead ---- */
+  .letterhead {
+    border-bottom: 1px solid var(--line);
+    padding: 2.6rem clamp(1.25rem, 4vw, 3rem) 2.2rem;
+  }
+  .letterhead-inner { max-width: 1080px; margin: 0 auto; }
+  .letterhead-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+  }
+  .letterhead-tag {
+    display: inline-block;
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+  .letterhead h1 {
+    margin: 0.9rem 0 0.5rem;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    line-height: 1.35;
+  }
+  .letterhead .sub {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+
+  /* ---- page grid ---- */
+  .layout {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 2.4rem clamp(1.25rem, 4vw, 3rem) 5rem;
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 1.75rem;
+    font-size: 0.86rem;
+  }
+  nav.toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--line);
+  }
+  nav.toc li { margin: 0; }
+  nav.toc a {
+    display: block;
+    padding: 0.42rem 0 0.42rem 0.9rem;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  nav.toc a:hover { color: var(--ink); border-left-color: var(--green); }
+  nav.toc .num { color: var(--green); font-family: "Yu Mincho", serif; margin-right: 0.4em; }
+
+  main { min-width: 0; }
+
+  section.doc-section {
+    padding-top: 0.4rem;
+    margin-bottom: 3.2rem;
+    scroll-margin-top: 1.5rem;
+  }
+  section.doc-section:first-of-type { margin-top: 0; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    margin-bottom: 1.1rem;
+  }
+  .section-head .num {
+    font-family: "Yu Mincho", "YuMincho", serif;
+    font-size: 1.4rem;
+    color: var(--green);
+    min-width: 1.6rem;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  p { margin: 0 0 1rem; }
+  h3 { font-size: 1.12rem; margin: 1.8rem 0 0.7rem; }
+
+  .lead {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+
+  /* ---- tables ---- */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--paper-card);
+    box-shadow: var(--shadow);
+    margin: 1.1rem 0 1.6rem;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; min-width: 480px; }
+  caption { text-align: left; font-size: 0.8rem; color: var(--ink-faint); padding: 0.7rem 1rem 0; }
+  th, td { padding: 0.68rem 1rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    font-family: "Yu Gothic", sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    background: var(--paper-sunken);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; }
+
+  /* ---- callouts ---- */
+  .callout {
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+    margin: 1.4rem 0;
+    border-left: 3px solid var(--green);
+    background: var(--green-soft);
+  }
+  .callout.risk { border-left-color: var(--amber); background: var(--amber-soft); }
+  .callout .label {
+    display: block;
+    font-size: 0.74rem;
+    letter-spacing: 0.09em;
+    color: var(--green);
+    margin-bottom: 0.45rem;
+    font-weight: 600;
+  }
+  .callout.risk .label { color: var(--amber); }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ---- stat tiles ---- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1.4rem 0 1.6rem;
+  }
+  .stat {
+    background: var(--paper-card);
+    padding: 1.15rem 1.25rem;
+  }
+  .stat .figure {
+    font-family: "Yu Mincho", serif;
+    font-size: 1.7rem;
+    color: var(--ink);
+    display: block;
+  }
+  .stat .figure small { font-size: 0.9rem; color: var(--ink-soft); font-family: inherit; }
+  .stat .caption { font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.3rem; }
+
+  /* ---- plan cards (A/B/C) ---- */
+  .plan-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper-card);
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.6rem;
+    margin: 1.4rem 0;
+  }
+  .plan-card h3 { margin-top: 0; display: flex; align-items: center; gap: 0.6rem; }
+  .plan-card .tag {
+    font-family: "Yu Gothic", sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--green);
+    border: 1px solid var(--green);
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+  }
+  .plan-card dl { margin: 0.8rem 0 0; display: grid; grid-template-columns: 5.2em 1fr; gap: 0.5rem 1rem; }
+  .plan-card dt { color: var(--ink-soft); font-size: 0.84rem; }
+  .plan-card dd { margin: 0; font-size: 0.94rem; }
+
+  ol.steps { padding-left: 1.2rem; margin: 1rem 0; }
+  ol.steps li { margin-bottom: 0.55rem; }
+
+  ul.compact { padding-left: 1.2rem; margin: 1rem 0; }
+  ul.compact li { margin-bottom: 0.4rem; }
+
+  .recommend {
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    padding: 1.5rem 1.7rem;
+    background: linear-gradient(180deg, var(--green-soft), var(--paper-card) 60%);
+    margin: 1.2rem 0 1.8rem;
+  }
+  .recommend .label {
+    font-size: 0.74rem;
+    letter-spacing: 0.09em;
+    color: var(--green);
+    font-weight: 600;
+  }
+  .recommend p:last-child { margin-bottom: 0; }
+
+  footer.sources {
+    border-top: 1px solid var(--line);
+    margin-top: 2.6rem;
+    padding-top: 1.6rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  footer.sources ol { padding-left: 1.2rem; }
+  footer.sources li { margin-bottom: 0.4rem; }
+  footer.sources .disclaimer {
+    margin-top: 1.6rem;
+    padding: 1rem 1.2rem;
+    background: var(--paper-sunken);
+    border-radius: 10px;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc {
+      position: static;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    nav.toc ol { display: flex; gap: 0.25rem; border-left: none; white-space: nowrap; }
+    nav.toc a { border-left: none; border-bottom: 2px solid transparent; padding: 0.3rem 0.7rem; }
+    nav.toc a:hover { border-left: none; border-bottom-color: var(--green); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    section.doc-section { scroll-behavior: smooth; }
+  }
+</style>
+
+<header class="letterhead">
+  <div class="letterhead-inner">
+    <div class="letterhead-meta">
+      <span>グランファルマ株式会社&nbsp;&middot;&nbsp;経営企画</span>
+      <span class="letterhead-tag">社内検討用ドラフト</span>
+    </div>
+    <h1>マンション一棟 入居者向け<br>処方箋応需拡大プラン</h1>
+    <p class="sub">在宅薬学管理・オンライン服薬指導・健康相談会を組み合わせた、かかりつけ化のための収益構造設計 &mdash; 2026年8月</p>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="目次">
+    <ol>
+      <li><a href="#s0"><span class="num">0</span>前提条件</a></li>
+      <li><a href="#s1"><span class="num">1</span>収益構造の全体像</a></li>
+      <li><a href="#s2"><span class="num">2</span>各収益源の詳細</a></li>
+      <li><a href="#s3"><span class="num">3</span>採算試算</a></li>
+      <li><a href="#s4"><span class="num">4</span>リスクと法令順守</a></li>
+      <li><a href="#s5"><span class="num">5</span>先方のメリット</a></li>
+      <li><a href="#s6"><span class="num">6</span>推奨案</a></li>
+      <li><a href="#sources"><span class="num">&#8213;</span>参考文献</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section class="doc-section" id="s0">
+      <div class="section-head"><span class="num">0</span><h2>前提条件(仮置き)</h2></div>
+      <p class="lead">情報が限定的なため、以下を仮の前提として設計している。重大な分岐点になり得る項目は「要確認事項」として別途整理した。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>項目</th><th>仮の前提</th></tr></thead>
+          <tbody>
+            <tr><td>対象マンション規模</td><td>都市部、150戸、平均世帯人数2.0人、居住者約300人</td></tr>
+            <tr><td>世帯構成</td><td>ファミリー層・単身現役層・高齢者層が混在。高齢化率は都市部平均程度と仮定し20%程度&#8288;=&#8288;約60人</td></tr>
+            <tr><td>在宅医療ニーズがある層</td><td>独居・要支援・要介護等、薬剤師の訪問管理が有効な層を10&#8211;15人程度と仮定</td></tr>
+            <tr><td>薬局拠点との距離</td><td>徒歩&#8211;車10分圏内に既存拠点があり、専任常駐ではなく兼務派遣が可能な立地</td></tr>
+            <tr><td>管理組合・デベロッパーとの関係</td><td>現時点で提携関係なし、これから協議に入る段階</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout risk">
+        <span class="label">要確認事項</span>
+        <p>対象マンションは「既存の中古マンション(管理組合が運営中)」か「新築分譲(デベロッパーが分譲中)」か&mdash;&mdash;前者は管理組合との協議、後者はデベロッパーとの提携が起点になり、進め方が根本的に変わる。</p>
+        <p>対象マンションの実際の年齢構成・高齢化率データの有無(あれば試算精度が上がる)。近隣に訪問診療医・在宅療養支援診療所との既存連携があるかも要確認。</p>
+      </div>
+    </section>
+
+    <section class="doc-section" id="s1">
+      <div class="section-head"><span class="num">1</span><h2>収益構造の全体像</h2></div>
+      <p>単一の施策ではなく、<strong>ターゲット層ごとに異なる収益源を組み合わせるレベニューミックス</strong>として設計する。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>案</th><th>名称</th><th>主ターゲット</th><th>狙い</th><th>主な収益源</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>A</strong></td>
+              <td>在宅薬学管理パッケージ</td>
+              <td>高齢者・独居・要支援&#47;要介護層(10&#8211;15人)</td>
+              <td>在宅医療枠組みでの継続応需(かかりつけ化)</td>
+              <td>訪問薬剤管理指導料、居宅療養管理指導費、各種加算、通常調剤報酬</td>
+            </tr>
+            <tr>
+              <td><strong>B</strong></td>
+              <td>オンライン服薬指導&#43;当日配達</td>
+              <td>現役層・共働き・ファミリー(30&#8211;45世帯)</td>
+              <td>「かかりつけ薬局」として指名される導線づくり</td>
+              <td>通常調剤報酬、配送手数料(自費)、服薬管理アプリ(自費オプション)</td>
+            </tr>
+            <tr>
+              <td><strong>C</strong></td>
+              <td>健康相談会・お薬相談窓口</td>
+              <td>マンション全住民</td>
+              <td>認知獲得&#47;A・Bへの送客</td>
+              <td>直接収益なし(コストセンター)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Cは単独では収益を生まないが、A・Bの「入口」として機能させることで、住民が薬局を認知していない状態からのコールドスタートを避けられる。管理組合・デベロッパーとの関係構築窓口としても機能する。</p>
+    </section>
+
+    <section class="doc-section" id="s2">
+      <div class="section-head"><span class="num">2</span><h2>各収益源の詳細</h2></div>
+
+      <div class="plan-card">
+        <h3>案A &nbsp;<span class="tag">在宅・高齢者起点</span></h3>
+        <p>在宅薬学管理パッケージ</p>
+        <dl>
+          <dt>誰から</dt><dd>マンション内の独居高齢者・要支援&#47;要介護認定者、または訪問診療を受けている患者</dd>
+          <dt>何に対して</dt><dd>定期訪問による服薬管理指導、残薬確認、多剤併用の整理、服薬カレンダー等を用いた実地指導</dd>
+          <dt>いくら</dt><dd>在宅患者訪問薬剤管理指導料(同一建物居住者)を算定。<strong>同一建物内の対象者数が増えるほど1人あたり単価が逓減する</strong>制度設計である点に留意(単一建物診療患者1人の場合650点、複数人では人数区分に応じて減算)。実際の点数区分は最新の診療報酬点数表・厚労省告示で個別確認が必要。</dd>
+          <dt>いつ</dt><dd>月1&#8211;4回程度の定期訪問(患者の状態・医師の指示による)。介護保険対象者は居宅療養管理指導費として算定(医療保険と介護保険は併給不可)。</dd>
+        </dl>
+      </div>
+
+      <div class="plan-card">
+        <h3>案B &nbsp;<span class="tag">現役層・かかりつけ化起点</span></h3>
+        <p>オンライン服薬指導&#43;当日配達</p>
+        <dl>
+          <dt>誰から</dt><dd>通院はするが薬局に立ち寄る時間がない共働き世帯・単身現役層</dd>
+          <dt>何に対して</dt><dd>処方箋データの電子送付&#8594;ビデオ通話による服薬指導&#8594;薬剤の宅配または共用部ロッカーでの受け取り</dd>
+          <dt>いくら</dt><dd>技術料部分(調剤基本料・薬剤服用歴管理指導料等)は対面同様に算定可能。2026年5月施行のガイドラインでは<strong>双方向のビデオ通話が要件</strong>(音声・チャットのみは不可)。配送手数料は自費で1回300&#8211;500円程度が現実的(調剤報酬に配送費は含まれない)。服薬管理アプリは無償提供の範囲と月額課金の自費オプションを切り分けて設計する。</dd>
+          <dt>いつ</dt><dd>処方箋発行の都度。慢性疾患であれば月1回程度が目安。</dd>
+        </dl>
+      </div>
+
+      <div class="plan-card">
+        <h3>案C &nbsp;<span class="tag">認知獲得・関係構築</span></h3>
+        <p>健康相談会・お薬相談窓口</p>
+        <dl>
+          <dt>誰から</dt><dd>直接の課金対象なし(無料開催)</dd>
+          <dt>何に対して</dt><dd>共用ラウンジ等での血圧測定、お薬手帳相談、市販薬・サプリとの飲み合わせ相談等</dd>
+          <dt>いくら</dt><dd>無償。コストは薬剤師人件費(月2回&times;2時間程度)と消耗品費のみ</dd>
+          <dt>位置づけ</dt><dd>A・Bへのコンバージョン装置。接点獲得&#8594;在宅ニーズの掘り起こし(案Aへ)、または指名獲得(案Bへ)という導線を狙う。</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="doc-section" id="s3">
+      <div class="section-head"><span class="num">3</span><h2>想定ユニットエコノミクス(概算)</h2></div>
+
+      <div class="callout risk">
+        <span class="label">試算の前提について</span>
+        <p>診療報酬点数表の詳細区分(同一建物居住者の人数区分、各種加算の算定要件)を精査せずに置いた概算。実際の点数は最新の点数表・地方厚生局への確認が不可欠であり、意思決定の最終根拠にはできない。方向性把握用の数字として参照のこと。</p>
+      </div>
+
+      <h3>案A(対象10人と仮定)</h3>
+      <p>1人あたり月2回訪問、1回あたり技術料を仮に3,000円(同一建物居住者の減算後の仮の水準)とすると、月間技術料は10人&times;2回&times;3,000円&#8288;=&#8288;<span class="tabular">60,000円</span>、年間で約<span class="tabular">72万円</span>。マンション一棟・対象10人程度では技術料の絶対額は小さく、単独での採算化は困難。同一建物減算の構造上、対象人数を増やしても1人あたり単価は伸びにくい。</p>
+
+      <h3>案B(利用30世帯・月1回処方と仮定)</h3>
+      <p>1回あたり技術料を仮に6,000円(慢性疾患処方箋の平均的水準)とすると、月間30件&times;6,000円&#8288;=&#8288;<span class="tabular">180,000円</span>、年間約<span class="tabular">216万円</span>。配送手数料(自費300円&#47;回)は月<span class="tabular">9,000円</span>、年間約<span class="tabular">10.8万円</span>。</p>
+
+      <h3>コスト側(概算)</h3>
+      <div class="stats">
+        <div class="stat">
+          <span class="figure tabular">650<small>万円&#47;年</small></span>
+          <span class="caption">専任薬剤師1名の人件費(社保等込み)</span>
+        </div>
+        <div class="stat">
+          <span class="figure tabular">100&#8211;300<small>万円</small></span>
+          <span class="caption">オンライン服薬指導・電子処方箋連携の初期費用(月額5&#8211;15万円が別途発生)</span>
+        </div>
+        <div class="stat">
+          <span class="figure tabular">50&#8211;150<small>万円</small></span>
+          <span class="caption">宅配ロッカー設置費(保守は年間10万円程度)</span>
+        </div>
+      </div>
+
+      <h3>損益分岐の目安</h3>
+      <p>上記コストを仮に「専任薬剤師人件費650万円&#43;システム月10万円&times;12&#8288;=&#8288;120万円&#43;ロッカー保守10万円」&#8288;=&#8288;<strong>年間約780万円の固定費</strong>とすると、案Aの1人あたり年間貢献(技術料ベース7.2万円と仮定)だけで賄うには<strong>約110人相当の対象者</strong>が必要という計算になり、150戸・高齢者60人程度のマンション一棟単体では到底賄えない。</p>
+
+      <div class="recommend">
+        <span class="label">試算からの示唆</span>
+        <p>マンション一棟単体を対象に専任薬剤師を配置する設計は、現時点の前提では採算が合わない可能性が高い。既存拠点の薬剤師による兼務派遣(限界費用ベースでの参入)とし、複数マンション・複数施設への横展開を前提とした損益設計に切り替えることを推奨する。</p>
+      </div>
+    </section>
+
+    <section class="doc-section" id="s4">
+      <div class="section-head"><span class="num">4</span><h2>リスクと法令順守上の重要論点</h2></div>
+      <p class="lead">マンション向けサービスは、制度上「良かれと思って設計したスキームが規制に抵触する」典型パターンになりやすい領域であり、本提案で最も重要なセクションである。</p>
+
+      <div class="callout risk">
+        <span class="label">最重要 &mdash; 患者紹介ビジネス規制(直近の制度動向)</span>
+        <p>2026年7月、厚生労働省は保険薬局及び保険薬剤師療養担当規則(第2条の3の2)に基づき、<strong>施設(高齢者施設を主眼)から薬局への金品授受が患者紹介の対価となりうる場合は禁止事項に該当する</strong>ことを明確化した。配薬カート・調剤棚などの什器の無償設置、配薬支援・見守りシステムの無償提供も「経済上の利益提供」に該当するとされ、2027年5月31日までの猶予期間の後は原則禁止となる。</p>
+        <p>通達の文言上は「高齢者施設」が主眼だが、根拠となる療担規則2条の3の2自体は施設類型を限定しない一般規定であり、<strong>マンション管理組合・デベロッパーに対する同様のスキーム</strong>(什器無償提供、システム無償提供、処方箋数に連動した協賛金・契約料の支払い等)<strong>も、実質的に処方箋応需誘引の対価とみなされるリスクがある</strong>。</p>
+      </div>
+
+      <h3>設計上の対応方針</h3>
+      <ul class="compact">
+        <li>管理組合・デベロッパーへの金銭提供は、処方箋応需・かかりつけ契約数と一切紐付けない。</li>
+        <li>宅配ロッカーの設置スペース利用料、健康相談会の会場使用料等は市場価格・実費相当の対価として個別に整理し、応需件数との連動を持たせない。</li>
+        <li>什器・システムの無償提供は、猶予期間内であっても新規に開始しない方針が安全。</li>
+        <li>実行前に医療法務に強い弁護士・行政書士のレビューを必須とする。</li>
+      </ul>
+
+      <h3>その他の留意点</h3>
+      <ul class="compact">
+        <li><strong>患者誘引規制</strong>&mdash;療担規則上、経済上の利益提供による患者誘引は禁止。健康相談会の粗品配布も換金性・高額性があれば誘引とみなされるリスクがあるため、実費数百円以内の啓発資材程度に留める。</li>
+        <li><strong>同一建物減算</strong>&mdash;在宅患者訪問薬剤管理指導料は同一建物居住者数が多いほど1人あたり点数が逓減する構造。マンション一棟での「まとめて多数対応」は件数の割に単価が伸びにくく、規模の経済が効きにくい。</li>
+        <li><strong>オンライン服薬指導の要件</strong>&mdash;2026年5月施行の改正薬機法により、ビデオ通話による双方向のやり取りが要件化。本人確認体制・初回対面の要否等は地方厚生局・薬剤師会のガイドラインを個別確認する。</li>
+        <li><strong>配送・受け取りロッカー運用</strong>&mdash;調剤薬剤の交付は薬剤師が行うのが原則。服薬指導との一体性、温度管理を要する薬剤の輸送品質、本人確認・誤交付防止の運用設計が必要。</li>
+        <li><strong>広告規制</strong>&mdash;医薬品医療機器等法の広告規制、医療機能情報提供制度の観点から、健康相談会等の告知内容(効能効果を暗示する表現)に注意する。</li>
+      </ul>
+    </section>
+
+    <section class="doc-section" id="s5">
+      <div class="section-head"><span class="num">5</span><h2>管理組合・デベロッパー側にとってのメリット</h2></div>
+      <p>金銭を伴わない協業を前提にすると、訴求できる価値は以下の通り。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>対象</th><th>訴求ポイント</th></tr></thead>
+          <tbody>
+            <tr><td>既存マンション(管理組合)</td><td>住民サービスの付加価値化。特に高齢化が進む築古マンションでの「見守り」的効果</td></tr>
+            <tr><td>新築分譲(デベロッパー)</td><td>モデルルーム・重要事項説明での差別化材料。「医療・健康」を切り口としたブランディング</td></tr>
+            <tr><td>管理会社</td><td>住民満足度向上によるクレーム減少、退去率低減への間接的寄与</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>いずれも「薬局が管理組合・デベロッパーに金銭を支払う&#47;支払わせる」構造ではなく、<strong>サービス提供そのものが管理組合・デベロッパーへの価値提供になる</strong>という整理が、規制リスクを避けつつ関係構築する上で安全である。</p>
+    </section>
+
+    <section class="doc-section" id="s6">
+      <div class="section-head"><span class="num">6</span><h2>推奨案</h2></div>
+
+      <div class="recommend">
+        <span class="label">推奨</span>
+        <p><strong>A(在宅薬学管理)&#43;B(オンライン&#43;配送)&#43;C(健康相談会)の複合モデル</strong>を推奨する。ただし実行順序が重要。</p>
+      </div>
+
+      <ol class="steps">
+        <li><strong>第一段階&mdash;Cから着手。</strong>専任配置不要・低コストで、管理組合との関係構築と住民の実態把握(高齢化率、在宅ニーズ、オンライン利用意向)を同時に行う。</li>
+        <li><strong>第二段階&mdash;反応を見てA・Bへ選択的に展開。</strong>健康相談会で接点を持った高齢者層には在宅薬学管理(A)を、現役層にはオンライン&#43;配送(B)を案内する。</li>
+        <li><strong>専任薬剤師の配置は時期尚早。</strong>試算上マンション一棟単体では採算ラインに届かない可能性が高いため、既存拠点からの兼務派遣で低コスト検証し、複数棟・同一エリア内の他物件への横展開を前提としたロードマップに切り替える。</li>
+      </ol>
+
+      <h3>検証すべき仮説</h3>
+      <ul class="compact">
+        <li>マンション住民の実際の年齢構成・在宅医療ニーズ(管理組合から匿名統計を取得できるか)</li>
+        <li>健康相談会への参加率、そこからのかかりつけ化への転換率</li>
+        <li>現役層のオンライン服薬指導・配送への利用意向と、自費配送料(300&#8211;500円想定)への価格受容性</li>
+        <li>管理組合・デベロッパーが「金銭を伴わない連携」にどこまで前向きか、規制順守を前提とした協業スキームへの理解が得られるか</li>
+        <li>既存拠点の薬剤師が兼務対応で実務上回るか(訪問件数・オンライン対応件数のキャパシティ)</li>
+      </ul>
+
+      <h3>次のアクション</h3>
+      <ol class="steps">
+        <li>対象マンションの実データ収集(管理組合との初回協議、または既存の地域医療連携基盤形成事業の枠組みでの情報収集)</li>
+        <li>法務レビュー&mdash;患者紹介ビジネス規制・独占禁止法の観点から、管理組合&#47;デベロッパーとの協業スキーム案を弁護士に確認</li>
+        <li>パイロット設計&mdash;3ヶ月程度、案C(健康相談会月1&#8211;2回)を試験実施し、参加率・在宅ニーズ掘り起こし件数をKPIとして計測</li>
+        <li>パイロット結果を踏まえ、案A・Bの本格導入判断(採算ラインの精緻化には、実際の同一建物居住者点数区分・介護報酬の適用可否を含めた詳細シミュレーションが必要)</li>
+        <li>複数棟展開を見据えたロードマップ策定(1棟単体では損益分岐に届かない前提のもと、エリア内の複数物件・施設をカバーする体制設計)</li>
+      </ol>
+    </section>
+
+    <footer class="sources" id="sources">
+      <h3 style="margin-top:0;">参考文献</h3>
+      <ol>
+        <li><a href="https://www.koureisha-jutaku.com/20260805_09_04/" target="_blank" rel="noopener">施設との金銭授受禁止 薬局療担規則明確化 &mdash; 週刊 高齢者住宅新聞 Online</a></li>
+        <li><a href="https://www.mhlw.go.jp/web/t_doc?dataId=84046000&dataType=0&pageNo=1" target="_blank" rel="noopener">保険薬局及び保険薬剤師療養担当規則(昭和32年厚生省令第16号)&mdash; 厚生労働省</a></li>
+        <li><a href="https://www.yurokyo.or.jp/contents/view/215" target="_blank" rel="noopener">患者紹介禁止内容について事務連絡を発出 &mdash; 厚生労働省(H26.7.10)</a></li>
+        <li><a href="https://medical-soleil.jp/column/651.html" target="_blank" rel="noopener">患者紹介の適法性 &mdash; 丸の内ソレイユ法律事務所</a></li>
+        <li><a href="https://www.mc-law.jp/kigyohomu/17128/" target="_blank" rel="noopener">病院・薬局の紹介料禁止ルール &mdash; 東京・埼玉の理系弁護士</a></li>
+        <li><a href="https://kakari.medpeer.jp/dispensation_fee_encyclopedia/40/" target="_blank" rel="noopener">在宅患者訪問薬剤管理指導料の解説と行政資料・疑義解釈等まとめ(令和8年度版)</a></li>
+        <li><a href="https://pharmacist.m3.com/column/chouzai_santei/6113" target="_blank" rel="noopener">【2026改定】在宅患者訪問薬剤管理指導料の算定要件 &mdash; m3.com</a></li>
+        <li><a href="https://www.mhlw.go.jp/stf/web_magazine/closeup/20.html" target="_blank" rel="noopener">2026年5月1日施行の医薬品販売制度の改正内容 &mdash; 厚生労働省</a></li>
+        <li><a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iyakuhin/yakkyoku_yakuzai/onlinefukuyaku.html" target="_blank" rel="noopener">オンライン服薬指導 &mdash; 厚生労働省</a></li>
+      </ol>
+      <div class="disclaimer">
+        本資料はいずれの数値も仮の前提に基づく概算であり、意思決定の最終根拠とせず、実データ・最新の点数表・法務確認をもって精査することを前提とする。特に第4章の患者紹介ビジネス規制は2026年7月の通達という直近の制度変更であり、猶予期間中も含めて保守的なスキーム設計を強く推奨する。
+      </div>
+    </footer>
+
+  </main>
+</div>
